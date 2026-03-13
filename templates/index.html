@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melbourne Foodie Reviews</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        .review-card { 
+            background: white; 
+            padding: 20px; 
+            margin-bottom: 15px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .rating { color: #d32323; font-weight: bold; }
+        h1 { text-align: center; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Melbourne Restaurant Insights</h1>
+        
+        {% for review in reviews %}
+        <div class="review-card">
+            <h3>{{ review.get('restaurant_name', 'Unknown Restaurant') }}</h3>
+            <p class="rating">Rating: {{ review.get('rating', 'N/A') }} / 5</p>
+            <p>{{ review.get('review_text', 'No review content available.') }}</p>
+        </div>
+        {% endfor %}
+
+    </div>
+</body>
+</html>
