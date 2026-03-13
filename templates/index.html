@@ -16,16 +16,17 @@
         }
         .rating { color: #d32323; font-weight: bold; }
         h1 { text-align: center; color: #333; }
+        
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Melbourne Restaurant Insights</h1>
-        
+        <p style="color: blue;">Debugging Columns: {{ reviews[0].keys() | list }}</p>
         {% for review in reviews %}
         <div class="review-card">
-            <h3>{{ review.get('restaurant_name', 'Unknown Restaurant') }}</h3>
-            <p class="rating">Rating: {{ review.get('rating', 'N/A') }} / 5</p>
+            <h3>{{ review.get('name', 'Unknown') }}</h3>
+            <p>{{ review.get('text', 'No text') }}</p>
             <p>{{ review.get('review_text', 'No review content available.') }}</p>
         </div>
         {% endfor %}
