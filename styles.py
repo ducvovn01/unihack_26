@@ -43,7 +43,7 @@ def load_css():
         }
 
         .navbar {
-            background: linear-gradient(90deg, #111827, #1f2937);
+            background: linear-gradient(90deg, #CE273D);
             padding: 22px 34px;
             color: white;
             border-radius: 0 0 16px 16px;
@@ -51,15 +51,15 @@ def load_css():
         }
 
         .navbar-title {
-            font-size: 28px;
+            font-size: 35px;
             font-weight: 700;
             margin: 0;
             line-height: 1.2;
         }
 
         .navbar-subtitle {
-            font-size: 14px;
-            color: #d1d5db;
+            font-size: 16px;
+            color: #FFFFFF;
             margin-top: 6px;
         }
 
