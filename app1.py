@@ -9,7 +9,7 @@ load_dotenv()
 my_api_key = os.getenv("GEMINI_API_KEY")
 
 genai.configure (api_key = my_api_key)
-model = genai.GenerativeModel("gemini-2.0-pro")
+model = genai.GenerativeModel("gemini-2.5-flash")
 st.set_page_config(page_title="Melbourne Hidden Gems", layout="wide")
 
 st.title("Travel chatbot for Melbourne Restaurants 🍴🗺️")
@@ -46,9 +46,23 @@ Please provide a list of the top 10 restaurants that match these criteria, sorte
 """
 
 model = genai.GenerativeModel(
-    model_name="gemini-2.0-pro",
+    model_name="gemini-2.5-flash",
     system_instruction = system_instructions
 )
+if "chat_session" not in st.session_state:
+    st.session_state.chat_session = model.start_chat(history=[])
+for message in st.session_state.chat_session.history:
+    role = "assistant" if message.role == "model" else "user"
+    with st.chat_message(role):
+        st.markdown(message.parts[0].text)
+user_input = st.chat_input("Ask for restaurant recommendations or adjust filters!")
+if user_input:
+    with st.chat_message("user"):
+        st.markdown(user_input)
+    with st.chat_message("assistant"):
+        with st.spinner("Finding the best matches..."):
+            response = st.session_state.chat_session.send_message(user_input)
+            st.markdown(response.parts[0].text)
 if filtered.empty:
     st.warning("No matches found. Try different filters!")
 else:
