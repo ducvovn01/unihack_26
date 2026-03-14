@@ -64,7 +64,8 @@ with st.sidebar:
         .unique()
     )
     area = st.selectbox("Area/Suburb", ["All"] + list(suburbs))
-
+    
+    
 # -------------------------
 # Apply Filters
 # -------------------------
