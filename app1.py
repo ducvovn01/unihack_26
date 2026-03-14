@@ -34,9 +34,9 @@ with st.sidebar:
     )
     area = st.selectbox("Area/Suburb", ["All"] + list(suburbs))
 
-data["priceLevel"] = data["priceLevel"].fillna("").astype(str).str.strip()
-data["address"] = data["address"].fillna("").astype(str).str.strip()
-
+# -------------------------
+# Apply Filters
+# -------------------------
 filtered = data.copy()
 
 if budget != "All":
