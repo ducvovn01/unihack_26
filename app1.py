@@ -63,18 +63,59 @@ model = genai.GenerativeModel(
 )
 if "chat_session" not in st.session_state:
     st.session_state.chat_session = model.start_chat(history=[])
-for message in st.session_state.chat_session.history:
-    role = "assistant" if message.role == "model" else "user"
-    with st.chat_message(role):
-        st.markdown(message.parts[0].text)
-user_input = st.chat_input("Ask for restaurant recommendations or adjust filters!")
-if user_input:
-    with st.chat_message("user"):
-        st.markdown(user_input)
-    with st.chat_message("assistant"):
-        with st.spinner("Finding the best matches..."):
-            response = st.session_state.chat_session.send_message(user_input)
-            st.markdown(response.parts[0].text)
+    st.session_state.last_budget = budget
+    st.session_state.last_area = area
+
+with st.sidebar:
+    st.markdown("---")
+    st.subheader("AI Food Assistant")
+
+    for message in st.session_state.chat_session.history:
+        role = "assistant" if message.role == "model" else "user"
+        with st.chat_message(role):
+            st.markdown(message.parts[0].text)
+
+    user_input = st.chat_input("Ask for restaurant tips...")
+    if user_input:
+        with st.chat_message("user"):
+            st.markdown(user_input)
+
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                response = st.session_state.chat_session.send_message(user_input)
+                st.markdown(response.parts[0].text)
+
+# -------------------------
+# Hero Section
+# -------------------------
+col_hero_left, col_hero_right = st.columns([1.05, 1], gap="large")
+
+with col_hero_left:
+    st.image("food.webp", use_container_width=True)
+
+with col_hero_right:
+    st.markdown("""
+    <div style="padding: 20px 10px 10px 10px;">
+        <div class="small-badge">Melbourne Food Guide</div>
+        <div class="hero-title">Find top-rated restaurants faster</div>
+        <div class="hero-text">
+            Discover highly rated Melbourne restaurants by budget and suburb, then use the AI assistant
+            in the sidebar for quick suggestions based on your preferences.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("<div class='section-title'>Restaurant Discovery Platform</div>", unsafe_allow_html=True)
+st.markdown(
+    "<div class='section-text'>Browse filtered recommendations and compare ratings to make a better dining choice.</div>",
+    unsafe_allow_html=True
+)
+
+# -------------------------
+# Main Recommendations
+# -------------------------
+st.subheader(f"Top Recommendations ({len(filtered)})")
+
 if filtered.empty:
     st.warning("No matches found. Try different filters!")
 else:
