@@ -1,9 +1,7 @@
+import os
 import pandas as pd
 
-def load_data(file_path):
-    data = pd.read_csv(file_path)
-    return data
-
-file_path = "data/melbourne_ta_reviews.csv"
-data = load_data(file_path)
-print(data.head())
+def get_data_concept():
+    df = pd.read_csv("data/melbourne_ta_reviews.csv")
+    df_string = df.to_string()
+    return df_string
