@@ -24,16 +24,28 @@ if data is None:
 with st.sidebar:
     st.header("Your Preferences")
     budget = st.selectbox("Budget", ["All", "$", "$$ - $$$", "$$$$"])
-    # Extract unique suburbs roughly
-    suburbs = sorted(data['address'].str.extract(r'([A-Za-z\s]+),\s*Victoria', expand=False).dropna().unique())
-    area = st.selectbox("Area/Suburb", ["All"] + suburbs)
 
-# Apply filters
+    suburbs = sorted(
+        data["address"]
+        .str.extract(r"([A-Za-z\s]+),\s*Victoria", expand=False)
+        .dropna()
+        .str.strip()
+        .unique()
+    )
+    area = st.selectbox("Area/Suburb", ["All"] + list(suburbs))
+
+data["priceLevel"] = data["priceLevel"].fillna("").astype(str).str.strip()
+data["address"] = data["address"].fillna("").astype(str).str.strip()
+
 filtered = data.copy()
+
 if budget != "All":
-    filtered = filtered[filtered['priceLevel'].str.contains(budget, na=False)]
+    filtered = filtered.loc[filtered["priceLevel"] == budget]
+
 if area != "All":
-    filtered = filtered[filtered['address'].str.contains(area, case=False, na=False)]
+    filtered = filtered.loc[
+        filtered["address"].str.contains(area, case=False, na=False, regex=False)
+    ]
 
 # Show top matches (best ranking first)
 filtered = filtered.head(10)  # limit to top 10 for demo
