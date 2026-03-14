@@ -1,13 +1,21 @@
-# app.py
+import os
+from dotenv import load_dotenv
 import streamlit as st
-from data import load_data
+from dotenv import load_dotenv
+import google.generativeai as genai
+from data import get_data_concept
 
+load_dotenv()
+my_api_key = os.getenv("GEMINI_API_KEY")
+
+genai.configure (api_key = my_api_key)
+model = genai.GenerativeModel("gemini-2.5-flash")
 st.set_page_config(page_title="Melbourne Hidden Gems", layout="wide")
 
-st.title("Melbourne Hidden Gems 🍴🗺️")
+st.title("Travel chatbot for Melbourne Restaurants 🍴🗺️")
 st.markdown("Discover top-rated Melbourne restaurants – great value, hidden spots, no tourist traps!")
 
-data = load_data("data/melbourne_ta_reviews.csv")
+data = get_data_concept()
 if data is None:
     st.error("Failed to load data. Check data.py for path issues.")
     st.stop()
@@ -15,7 +23,7 @@ if data is None:
 # Simple sidebar filters
 with st.sidebar:
     st.header("Your Preferences")
-    budget = st.selectbox("Budget", ["All", "$", "$$ - $$$"])
+    budget = st.selectbox("Budget", ["All", "$", "$$ - $$$", "$$$$"])
     # Extract unique suburbs roughly
     suburbs = sorted(data['address'].str.extract(r'([A-Za-z\s]+),\s*Victoria', expand=False).dropna().unique())
     area = st.selectbox("Area/Suburb", ["All"] + suburbs)
@@ -30,6 +38,31 @@ if area != "All":
 # Show top matches (best ranking first)
 filtered = filtered.head(10)  # limit to top 10 for demo
 
+# System instructions for AI chatbot
+system_instructions = f""" You are an assistent that helps users find restaurants based on some criteria in Melbourne. This is the dataset of the 
+restaurantss: {data}. 
+The user is looking for restaurants that match the following criteria: Budget: {budget}, Area/Suburb: {area}.
+Please provide a list of the top 10 restaurants that match these criteria, sorted by their ranking
+"""
+
+model = genai.GenerativeModel(
+    model_name="gemini-2.5-flash",
+    system_instruction = system_instructions
+)
+if "chat_session" not in st.session_state:
+    st.session_state.chat_session = model.start_chat(history=[])
+for message in st.session_state.chat_session.history:
+    role = "assistant" if message.role == "model" else "user"
+    with st.chat_message(role):
+        st.markdown(message.parts[0].text)
+user_input = st.chat_input("Ask for restaurant recommendations or adjust filters!")
+if user_input:
+    with st.chat_message("user"):
+        st.markdown(user_input)
+    with st.chat_message("assistant"):
+        with st.spinner("Finding the best matches..."):
+            response = st.session_state.chat_session.send_message(user_input)
+            st.markdown(response.parts[0].text)
 if filtered.empty:
     st.warning("No matches found. Try different filters!")
 else:
