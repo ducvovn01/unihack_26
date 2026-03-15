@@ -1,15 +1,14 @@
-import os
-from dotenv import load_dotenv
+
 import streamlit as st
-from dotenv import load_dotenv
+
 import google.generativeai as genai
 from data import get_data_concept
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 import pandas as pd
 
-load_dotenv()
-my_api_key = os.getenv("GEMINI_API_KEY")
+
+my_api_key = st.secrets("GEMINI_API_KEY")
 
 genai.configure (api_key = my_api_key)
 model = genai.GenerativeModel("gemini-2.5-flash")
