@@ -4,6 +4,9 @@ import streamlit as st
 from dotenv import load_dotenv
 import google.generativeai as genai
 from data import get_data_concept
+from geopy.geocoders import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
+import pandas as pd
 
 load_dotenv()
 my_api_key = os.getenv("GEMINI_API_KEY")
@@ -134,3 +137,90 @@ else:
 
 # Placeholder for map (next step)
 st.subheader("Map View (coming soon)")
+
+
+# -------------------------
+# Add lat/lon via geocoding 
+# -------------------------
+import pandas as pd
+from geopy.geocoders import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
+
+# Cache geocoding results (first run slow, later instant)
+@st.cache_data(ttl=86400 * 7)  # 24 hours
+def get_lat_lon(address):
+    if not address or pd.isna(address):
+        return None, None
+    try:
+        geolocator = Nominatim(user_agent="melbourne_hidden_gems_app_2026_v1", timeout=15)
+        location = geolocator.geocode(address, timeout=10)
+        if location:
+            return location.latitude, location.longitude
+        return None, None
+    except Exception:
+        return None, None
+
+# Only geocode if columns missing
+if 'lat' not in filtered.columns or 'lon' not in filtered.columns:
+    with st.spinner("Adding map locations (first time may take 20-60s)..."):
+        lat_lon = filtered['address'].apply(get_lat_lon)
+        filtered['lat'] = lat_lon.apply(lambda x: x[0])
+        filtered['lon'] = lat_lon.apply(lambda x: x[1])
+
+# Filter out rows without coordinates
+map_ready = filtered.dropna(subset=['lat', 'lon'])
+
+import pydeck as pdk
+import streamlit as st
+
+layer = pdk.Layer(
+    'ScatterplotLayer',
+    data=map_ready,
+    get_position=['lon', 'lat'],           
+    get_radius=100,                        
+    get_fill_color=[255, 80, 80, 220],     
+    pickable=True,                         
+    auto_highlight=True,                  
+    opacity=0.8
+)
+
+tooltip = {
+    "html": """
+    <b>{name}</b><br>
+    📍 {address}<br>
+    ⭐ {rating} 
+    """,
+    "style": {
+        "background": "rgba(0, 0, 0, 0.85)",
+        "color": "white",
+        "font-family": "Arial, sans-serif",
+        "padding": "10px",
+        "border-radius": "6px",
+        "max-width": "300px"
+    }
+}
+
+if not map_ready.empty:
+    view_state = pdk.ViewState(
+        latitude=map_ready['lat'].mean(),
+        longitude=map_ready['lon'].mean(),
+        zoom=11,          
+        pitch=0,
+        bearing=0
+    )
+else:
+    view_state = pdk.ViewState(
+        latitude=-37.8136, longitude=144.9631,  
+        zoom=11
+    )
+
+st.pydeck_chart(
+    pdk.Deck(
+        layers=[layer],
+        initial_view_state=view_state,
+        tooltip=tooltip,
+        map_style='dark',
+        map_provider='carto'  
+    )
+)
+
