@@ -8,7 +8,7 @@ from geopy.extra.rate_limiter import RateLimiter
 import pandas as pd
 
 
-my_api_key = st.secrets("GEMINI_API_KEY")
+my_api_key = st.secrets["GEMINI_API_KEY"]
 
 genai.configure (api_key = my_api_key)
 model = genai.GenerativeModel("gemini-2.5-flash")
