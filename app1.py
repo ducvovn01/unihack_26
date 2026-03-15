@@ -135,7 +135,7 @@ else:
                 st.metric("Rating", f"{row['rating']} ⭐")
 
 # Placeholder for map (next step)
-st.subheader("Map View (coming soon)")
+st.subheader("Map View")
 
 
 # -------------------------
